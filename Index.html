@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نظام الموارد البشرية HR</title>
+
+<style>
+:root{--navy:#142b4a;--blue:#2463eb;--bg:#f4f7fb;--card:#fff;--text:#17243a;--muted:#718096;--line:#e4eaf2;--green:#16845b;--red:#c43d4b;--amber:#a86b08}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:8px;padding:10px 15px;background:var(--blue);color:#fff}button.secondary{background:#e8eef8;color:var(--navy)}button.danger{background:var(--red)}button.success{background:var(--green)}input,select,textarea{padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;width:100%;min-width:0}label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}.app{display:flex;min-height:100vh}.sidebar{width:245px;background:var(--navy);color:#fff;padding:18px;flex-shrink:0}.sidebar h2{font-size:20px;margin:5px 0 20px}.nav button{display:block;width:100%;text-align:right;background:transparent;color:#dce7f7;margin:4px 0}.nav button.active,.nav button:hover{background:#29466d}.main{flex:1;padding:22px;min-width:0}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.panel,.stat{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:17px;margin-bottom:16px}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat strong{display:block;font-size:25px;margin-top:8px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:650px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:right;font-size:13px}th{background:#f1f5fa}.muted{color:var(--muted)}.hidden{display:none!important}.notice{padding:12px;border-radius:9px;background:#fff5dd;color:#805500;margin:10px 0}.ok{background:#e4f6ed;color:#176444}.error{background:#ffebed;color:#9f2632}.tag{display:inline-block;padding:4px 8px;border-radius:20px;background:#edf2fa;font-size:12px}.form-row{margin-bottom:12px}.small{font-size:12px}.filebox{border:2px dashed #bdcbe0;padding:20px;text-align:center;border-radius:12px;background:#f9fbff}.preview{max-height:380px;overflow:auto}.preview table{min-width:850px}.footer{font-size:12px;color:var(--muted);text-align:center;margin:25px 0}
+@media(max-width:760px){.app{display:block}.sidebar{width:100%;padding:12px}.sidebar h2{margin-bottom:10px}.nav{display:flex;overflow:auto;gap:5px}.nav button{white-space:nowrap;width:auto}.main{padding:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<h2>نظام الموارد البشرية</h2>
+<div class="nav" id="nav">
+<button class="active" onclick="showPage('dashboard',this)">لوحة التحكم</button>
+<button onclick="showPage('employees',this)">الموظفون</button>
+<button onclick="showPage('departments',this)">الأقسام والفرق</button>
+<button onclick="showPage('rota',this)">الروتة اليومية</button>
+<button onclick="showPage('attendance',this)">الحضور والغياب</button>
+<button onclick="showPage('leaves',this)">الإجازات والراحات</button>
+<button onclick="showPage('trips',this)">السفريات والمأموريات</button>
+<button onclick="showPage('payroll',this)">الرواتب</button>
+<button onclick="showPage('loans',this)">السلف والأقساط</button>
+<button onclick="showPage('reports',this)">التقارير</button>
+<button onclick="showPage('settings',this)">الإعدادات</button>
+</div>
+</aside>
+<main class="main">
+<div class="top"><div><h2 id="pageTitle">لوحة التحكم</h2><span class="muted">إدارة بيانات الموارد البشرية</span></div><div id="today"></div></div>
+<section id="dashboard" class="page">
+<div class="stats" id="dashboardStats"></div>
+<div class="panel"><h3>ملخص النظام</h3><p class="muted">أضف الموظفين أولاً، ثم استورد الروتة اليومية لتحويل الأسماء إلى حضور وإجازات ومقترحات سفريات.</p></div>
+</section>
+
+<section id="employees" class="page hidden">
+<div class="panel"><h3>إضافة موظف</h3>
+<div class="grid">
+<div><label>كود الموظف</label><input id="empCode" placeholder="مثال: 1001"></div>
+<div><label>اسم الموظف</label><input id="empName" placeholder="الاسم رباعي"></div>
+<div><label>القسم</label><input id="empDept" placeholder="القسم"></div>
+<div><label>الفئة</label><select id="empGroup"><option value="سائق">سائق</option><option value="مركب">مركب</option><option value="حمال">حمال</option><option value="مشرف">مشرف</option><option value="إداري">إداري</option></select></div>
+<div><label>رقم الهاتف</label><input id="empPhone"></div>
+<div><label>تاريخ التعيين</label><input id="empHire" type="date"></div>
+</div><div class="actions"><button onclick="addEmployee()">حفظ الموظف</button></div></div>
+<div class="panel"><h3>سجل الموظفين</h3><input id="empSearch" placeholder="ابحث بالاسم أو الكود" oninput="renderEmployees()"><div class="table-wrap" id="employeesTable"></div></div>
+</section>
+
+<section id="departments" class="page hidden"><div class="panel"><h3>الأقسام والفرق</h3><p class="muted">بيانات الأقسام والفئات المسجلة للموظفين تظهر في سجل الموظفين.</p><div id="departmentSummary"></div></div></section>
+
+<section id="rota" class="page hidden">
+<div class="panel"><h3>استيراد الروتة من Excel</h3>
+<p class="muted">ارفع ملف الروتة اليومي بصيغة Excel أو CSV. سيقرأ النظام أوراق الملف ويعرضها للمراجعة قبل التحويل.</p>
+<div class="grid">
+<div><label>تاريخ الروتة</label><input type="date" id="rotaDate"></div>
+<div><label>ملف الروتة</label><input type="file" id="rotaFile" accept=".xlsx,.xls,.csv"></div>
+</div>
+<div class="actions"><button onclick="loadRota()">قراءة ملف الروتة</button><button class="secondary" onclick="clearRota()">مسح المعاينة</button></div>
+<div id="rotaMessage"></div><div id="rotaPreview" class="preview"></div>
+<div id="rotaActions" class="actions hidden"><button class="success" onclick="confirmRota()">اعتماد وتحويل للحضور والإجازات</button></div>
+</div>
+<div class="panel"><h3>سجل عمليات الاستيراد</h3><div id="rotaHistory"></div></div>
+</section>
+
+<section id="attendance" class="page hidden"><div class="panel"><h3>الحضور والغياب</h3><div class="grid"><div><label>التاريخ</label><input type="date" id="attDate" onchange="renderAttendance()"></div><div><label>بحث</label><input id="attSearch" oninput="renderAttendance()" placeholder="اسم الموظف"></div></div><div id="attendanceTable" class="table-wrap"></div></div></section>
+
+<section id="leaves" class="page hidden"><div class="panel"><h3>الإجازات والراحات</h3><div id="leavesTable" class="table-wrap"></div></div></section>
+
+<section id="trips" class="page hidden"><div class="panel"><h3>السفريات والمأموريات المقترحة</h3><p class="muted">السفر خارج القاهرة والجيزة يحتاج مراجعة واعتماد الإدارة.</p><div id="tripsTable" class="table-wrap"></div></div></section>
+
+<section id="payroll" class="page hidden"><div class="panel"><h3>الرواتب</h3><p class="muted">إدارة الرواتب الأساسية والإضافات والخصومات.</p><div id="payrollTable"></div></div></section>
+<section id="loans" class="page hidden"><div class="panel"><h3>السلف والأقساط</h3><div id="loansTable"></div></div></section>
+<section id="reports" class="page hidden"><div class="panel"><h3>التقارير</h3><div class="actions"><button onclick="exportData()">تصدير نسخة احتياطية JSON</button><button class="secondary" onclick="exportAttendance()">تصدير الحضور CSV</button></div><div id="reportsSummary"></div></div></section>
+<section id="settings" class="page hidden"><div class="panel"><h3>إعدادات النظام</h3><div class="actions"><button class="secondary" onclick="backupData()">تنزيل نسخة احتياطية</button><button class="danger" onclick="resetData()">مسح جميع البيانات</button></div><p class="muted">البيانات محفوظة في المتصفح الحالي باستخدام التخزين المحلي.</p></div></section>
+<div class="footer">نظام الموارد البشرية HR</div>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const KEY='hr_system_data_v4';
+let db=loadDB();
+let importedSheets=[];
+let parsedRota=null;
+
+function freshDB(){return {employees:[],attendance:[],leaves:[],trips:[],rotaImports:[],payroll:[],loans:[],departments:[]}}
+function loadDB(){try{return JSON.parse(localStorage.getItem(KEY))||freshDB()}catch(e){return freshDB()}}
+function saveDB(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function todayISO(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+document.getElementById('today').textContent=new Date().toLocaleDateString('ar-EG');
+document.getElementById('rotaDate').value=todayISO();
+document.getElementById('attDate').value=todayISO();
+
+function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('pageTitle').textContent=btn?btn.textContent:id;renderAll()}
+function addEmployee(){
+let code=document.getElementById('empCode').value.trim(),name=document.getElementById('empName').value.trim();
+if(!name){alert('اكتب اسم الموظف');return}
+if(db.employees.some(e=>code&&e.code===code)){alert('كود الموظف موجود بالفعل');return}
+if(db.employees.some(e=>normalizeName(e.name)===normalizeName(name))){alert('اسم الموظف موجود بالفعل');return}
+db.employees.push({id:Date.now(),code,name,dept:document.getElementById('empDept').value.trim(),group:document.getElementById('empGroup').value,phone:document.getElementById('empPhone').value.trim(),hire:document.getElementById('empHire').value});
+['empCode','empName','empDept','empPhone','empHire'].forEach(id=>document.getElementById(id).value='');saveDB();alert('تم حفظ الموظف');
+}
+function renderEmployees(){
+let q=(document.getElementById('empSearch')?.value||'').trim().toLowerCase();
+let rows=db.employees.filter(e=>(e.name+' '+e.code+' '+e.dept).toLowerCase().includes(q));
+document.getElementById('employeesTable').innerHTML=`<table><thead><tr><th>الكود</th><th>الاسم</th><th>القسم</th><th>الفئة</th><th>الهاتف</th><th>إجراء</th></tr></thead><tbody>${rows.map(e=>`<tr><td>${esc(e.code)}</td><td>${esc(e.name)}</td><td>${esc(e.dept)}</td><td>${esc(e.group)}</td><td>${esc(e.phone)}</td><td><button class="danger small" onclick="deleteEmployee(${e.id})">حذف</button></td></tr>`).join('')}</tbody></table>`;
+}
+function deleteEmployee(id){if(!confirm('حذف الموظف؟'))return;db.employees=db.employees.filter(e=>e.id!==id);saveDB()}
+function renderAll(){
+renderEmployees();renderAttendance();renderLeaves();renderTrips();renderDashboard();renderDepartments();renderRotaHistory();
+document.getElementById('payrollTable').textContent='عدد الموظفين: '+db.employees.length;
+document.getElementById('loansTable').textContent='عدد السلف المسجلة: '+db.loans.length;
+document.getElementById('reportsSummary').textContent='الموظفون: '+db.employees.length+' | الحضور: '+db.attendance.length+' | الإجازات: '+db.leaves.length+' | السفريات: '+db.trips.length;
+}
+function renderDashboard(){
+let present=db.attendance.filter(x=>x.status==='حاضر').length,absent=db.attendance.filter(x=>x.status==='غائب').length;
+document.getElementById('dashboardStats').innerHTML=`<div class="stat">إجمالي الموظفين<strong>${db.employees.length}</strong></div><div class="stat">سجلات الحضور<strong>${present}</strong></div><div class="stat">سجلات الغياب<strong>${absent}</strong></div><div class="stat">الإجازات<strong>${db.leaves.length}</strong></div><div class="stat">السفريات<strong>${db.trips.length}</strong></div>`;
+}
+function renderDepartments(){
+let groups={};db.employees.forEach(e=>{let k=e.group||'غير محدد';groups[k]=(groups[k]||0)+1});
+document.getElementById('departmentSummary').innerHTML=Object.entries(groups).map(([k,v])=>`<p>${esc(k)}: <b>${v}</b></p>`).join('')||'لا توجد بيانات';
+}
+function renderAttendance(){
+let date=document.getElementById('attDate')?.value||todayISO(),q=(document.getElementById('attSearch')?.value||'').trim();
+let rows=db.attendance.filter(x=>x.date===date&&(!q||x.name.includes(q)));
+document.getElementById('attendanceTable').innerHTML=`<table><thead><tr><th>الموظف</th><th>التاريخ</th><th>الحالة</th><th>المصدر</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.date)}</td><td>${esc(x.status)}</td><td>${esc(x.source||'')}</td></tr>`).join('')}</tbody></table>`||'لا توجد سجلات';
+}
+function renderLeaves(){document.getElementById('leavesTable').innerHTML=`<table><thead><tr><th>الموظف</th><th>التاريخ</th><th>نوع الإجازة</th><th>المصدر</th></tr></thead><tbody>${db.leaves.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.source||'روتة')}</td></tr>`).join('')}</tbody></table>`}
+function renderTrips(){document.getElementById('tripsTable').innerHTML=`<table><thead><tr><th>الموظف</th><th>التاريخ</th><th>المنطقة</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody>${db.trips.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.date)}</td><td>${esc(x.area)}</td><td>${esc(x.status)}</td><td>${x.status==='مقترح'?`<button class="success" onclick="approveTrip(${x.id})">اعتماد</button>`:''}</td></tr>`).join('')}</tbody></table>`}
+function approveTrip(id){let t=db.trips.find(x=>x.id===id);if(t){t.status='معتمد';saveDB()}}
+function normalizeName(s){return String(s||'').normalize('NFKC').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/[ًٌٍَُِّْـ]/g,'').replace(/\s+/g,' ').trim().toLowerCase()}
+function findEmployee(name){let n=normalizeName(name);return db.employees.find(e=>normalizeName(e.name)===n)||null}
+function cellText(v){return String(v??'').replace(/\s+/g,' ').trim()}
+function isEmpty(v){return !cellText(v)}
+function isHeader(v){let s=normalizeName(v);return !s||/^(اسم|الاسم|السائق|السائقين|المركب|المركبين|المشرف|المشرفين|الحمال|الحمالين|المنطقه|المنطقة|الاجازه|الاجازات|الراحه|الراحة|التاريخ|ملاحظات|العدد|الفريق|السياره|السيارة|رقم|كود|احتياطي|الاحتياطي)$/.test(s)}
+function isArea(v){let s=normalizeName(v);return /(القاهره|القاهرة|الجيزه|الجيزة|اكتوبر|العبور|التجمع|مدينه نصر|مدينة نصر|المعادي|شبرا|حلوان|الهرم|فيصل|وسط البلد|مصر الجديده|مصر الجديدة)/.test(s)}
+function classifyLeave(v){let s=normalizeName(v);if(/سنوي/.test(s))return 'سنوية';if(/عارض/.test(s))return 'عارضة';if(/مرضي|مرض/.test(s))return 'مرضية';if(/راحه|راحة|اجازه|اجازة/.test(s))return cellText(v)||'راحة';return cellText(v)||'إجازة'}
+function loadRota(){
+let file=document.getElementById('rotaFile').files[0];if(!file){alert('اختار ملف Excel الأول');return}
+if(typeof XLSX==='undefined'){document.getElementById('rotaMessage').innerHTML='<div class="notice error">تعذر تحميل مكتبة Excel. تأكد من اتصال الإنترنت ثم أعد تحميل الصفحة.</div>';return}
+let reader=new FileReader();
+reader.onload=e=>{
+try{
+let wb=XLSX.read(e.target.result,{type:'array'});importedSheets=[];
+wb.SheetNames.forEach(name=>{let ws=wb.Sheets[name];let rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});importedSheets.push({name,rows})});
+renderPreview();document.getElementById('rotaMessage').innerHTML='<div class="notice ok">تمت قراءة الملف. راجع المعاينة ثم اعتمد التحويل.</div>';document.getElementById('rotaActions').classList.remove('hidden');
+}catch(err){document.getElementById('rotaMessage').innerHTML='<div class="notice error">خطأ في قراءة الملف: '+esc(err.message)+'</div>'}
+};
+reader.readAsArrayBuffer(file);
+}
+function renderPreview(){
+let html='';
+importedSheets.forEach(sh=>{
+html+=`<h4>${esc(sh.name)} (${sh.rows.length} صف)</h4><table><tbody>`;
+sh.rows.slice(0,30).forEach(row=>{html+='<tr>'+row.slice(0,12).map(v=>`<td>${esc(v)}</td>`).join('')+'</tr>'});
+html+='</tbody></table>';
+});
+document.getElementById('rotaPreview').innerHTML=html;
+}
+function clearRota(){importedSheets=[];parsedRota=null;document.getElementById('rotaPreview').innerHTML='';document.getElementById('rotaMessage').innerHTML='';document.getElementById('rotaActions').classList.add('hidden')}
+function renderRotaHistory(){let el=document.getElementById('rotaHistory');if(!el)return;el.innerHTML=db.rotaImports.map(x=>`<p>${esc(x.date)} — ${esc(x.file)} — ${esc(x.status)} — ${x.count||0} سجل</p>`).join('')||'لا توجد عمليات استيراد سابقة'}
+function parseRota(){
+let date=document.getElementById('rotaDate').value||todayISO();
+let appearances=[];
+const add=(name,kind,area,place)=>{
+name=cellText(name);if(!name||isHeader(name)||name.length<3)return;
+let emp=findEmployee(name);if(!emp)return;
+appearances.push({id:emp.id,name:emp.name,kind,area:cellText(area),place});
+};
+importedSheets.forEach(sh=>{
+let sheetName=normalizeName(sh.name);
+sh.rows.forEach((row,ri)=>{
+let cells=row.map(cellText);
+let joined=normalizeName(cells.join(' '));
+let leaveRow=/اجاز|راحة|راحه/.test(joined);
+let group='';
+if(/مشرف/.test(joined))group='مشرف';
+else if(/حمال/.test(joined))group='حمال';
+else if(/سائق/.test(joined))group='سائق';
+else if(/مركب/.test(joined))group='مركب';
+let area=cells.find(c=>isArea(c))||'';
+if(leaveRow){
+cells.forEach((c,ci)=>{
+let emp=findEmployee(c);
+if(emp)add(c,'إجازة','',`${sh.name} صف ${ri+1} عمود ${ci+1}: ${classifyLeave(cells[ci-1]||'إجازة')}`);
+});
+return;
+}
+if(group){
+cells.forEach((c,ci)=>{
+if(findEmployee(c))add(c,group,area,`${sh.name} صف ${ri+1} عمود ${ci+1}`);
+});
+return;
+}
+if(sheetName.includes('روتة')||sheetName.includes('rota')){
+let matched=cells.filter(c=>findEmployee(c));
+matched.forEach(c=>add(c,'عمل',area,`${sh.name} صف ${ri+1}`));
+}
+});
+});
+return {date,appearances};
+}
+function confirmRota(){
+if(!importedSheets.length){alert('اقرأ ملف الروتة أولاً');return}
+if(!db.employees.length){alert('أضف الموظفين في سجل الموظفين أولاً');return}
+let parsed=parseRota(),seen={},duplicates=[];
+parsed.appearances.forEach(a=>{if(!seen[a.id])seen[a.id]=[];seen[a.id].push(a)});
+Object.values(seen).forEach(arr=>{if(arr.length>1)duplicates.push(arr)});
+if(duplicates.length){
+let msg=duplicates.map(arr=>`${arr[0].name}: ${arr.map(x=>x.place).join(' / ')}`).join('\n');
+document.getElementById('rotaMessage').innerHTML=`<div class="notice error"><b>لا يمكن اعتماد الروتة بسبب تكرار أسماء الموظفين:</b><pre>${esc(msg)}</pre>يجب حل التكرارات أولاً ثم إعادة الاستيراد.</div>`;
+return;
+}
+let date=parsed.date,created=0;
+parsed.appearances.forEach(a=>{
+if(a.kind==='إجازة'){
+if(!db.leaves.some(x=>x.employeeId===a.id&&x.date===date)){
+db.leaves.push({id:Date.now()+Math.random(),employeeId:a.id,name:a.name,date,type:classifyLeave(a.place.split(':').pop()),source:'روتة Excel'});created++;
+}
+}else{
+if(!db.attendance.some(x=>x.employeeId===a.id&&x.date===date)){
+db.attendance.push({id:Date.now()+Math.random(),employeeId:a.id,name:a.name,date,status:'حاضر',source:'روتة Excel'});created++;
+}
+if(a.area&&!isArea(a.area)===false&&!/(القاهره|القاهرة|الجيزه|الجيزة)/.test(normalizeName(a.area))){
+if(!db.trips.some(x=>x.employeeId===a.id&&x.date===date&&x.area===a.area)){
+db.trips.push({id:Date.now()+Math.random(),employeeId:a.id,name:a.name,date,area:a.area,status:'مقترح'});
+}
+}
+}
+});
+db.rotaImports.push({date,file:document.getElementById('rotaFile').files[0]?.name||'Excel',status:'تم التحويل',count:created});
+saveDB();
+document.getElementById('rotaMessage').innerHTML=`<div class="notice ok">تم التحويل بنجاح. عدد السجلات الجديدة: ${created}</div>`;
+document.getElementById('rotaActions').classList.add('hidden');
+}
+function exportData(){
+let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});downloadBlob(blob,'HR_Backup_'+todayISO()+'.json');
+}
+function backupData(){exportData()}
+function exportAttendance(){
+let rows=[['الاسم','التاريخ','الحالة','المصدر'],...db.attendance.map(x=>[x.name,x.date,x.status,x.source])];
+let csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'attendance_'+todayISO()+'.csv');
+}
+function downloadBlob(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function resetData(){if(!confirm('هل أنت متأكد من مسح جميع بيانات النظام؟ لا يمكن التراجع.'))return;localStorage.removeItem(KEY);db=freshDB();renderAll()}
+renderAll();
+</script>
+</body>
+  </html>
